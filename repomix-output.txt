@@ -1,0 +1,963 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+================================================================
+File Summary
+================================================================
+
+Purpose:
+--------
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+
+File Format:
+------------
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  a. A separator line (================)
+  b. The file path (File: path/to/file)
+  c. Another separator line
+  d. The full contents of the file
+  e. A blank line
+
+Usage Guidelines:
+-----------------
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+
+Notes:
+------
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+
+
+================================================================
+Directory Structure
+================================================================
+public/
+  file.svg
+  globe.svg
+  next.svg
+  vercel.svg
+  window.svg
+src/
+  app/
+    favicon.ico
+    globals.css
+    layout.tsx
+    page.module.css
+    page.tsx
+  components/
+    ui/
+      accordion.tsx
+  theme/
+    theme-provider.tsx
+    theme.ts
+.gitignore
+eslint.config.mjs
+idea.md
+next.config.ts
+package.json
+README.md
+tsconfig.json
+
+================================================================
+Files
+================================================================
+
+================
+File: src/components/ui/accordion.tsx
+================
+'use client';
+
+import * as React from 'react';
+import Box, { BoxProps } from '@mui/material/Box';
+import MuiAccordion, { AccordionProps } from '@mui/material/Accordion';
+import MuiAccordionSummary, { AccordionSummaryProps } from '@mui/material/AccordionSummary';
+import MuiAccordionDetails, { AccordionDetailsProps } from '@mui/material/AccordionDetails';
+import { styled } from '@mui/material/styles';
+import { ChevronDown } from 'lucide-react';
+
+// ----------------------------------------------------------------------
+// 1. Accordion (Root)
+// Generalization: Allow 'sx' overrides and BoxProps
+// ----------------------------------------------------------------------
+export interface CustomAccordionRootProps extends BoxProps {
+    // You can add state management here later (e.g., type="single" | "multiple")
+}
+
+const Accordion = React.forwardRef<HTMLDivElement, CustomAccordionRootProps>(
+    ({ className, sx, ...props }, ref) => (
+        <Box ref={ref} className={className} sx={{ width: '100%', ...sx }} {...props} />
+    )
+);
+Accordion.displayName = 'Accordion';
+
+// ----------------------------------------------------------------------
+// 2. Accordion Item
+// Generalization: Theme-aware spacing instead of hardcoded pixels
+// ----------------------------------------------------------------------
+const StyledMuiAccordion = styled((props: AccordionProps) => (
+    <MuiAccordion disableGutters elevation={0} square {...props} />
+))(({ theme }) => ({
+    backgroundColor: 'transparent',
+    borderBottom: `1px solid ${theme.palette.divider}`,
+    '&:last-of-type': {
+        borderBottom: 'none',
+    },
+    '&::before': {
+        display: 'none',
+    },
+}));
+
+export interface CustomAccordionItemProps extends AccordionProps {
+    value?: string;
+}
+
+const AccordionItem = React.forwardRef<HTMLDivElement, CustomAccordionItemProps>(
+    ({ className, sx, value: _value, ...props }, ref) => (
+        // Passing sx down allows consumers to override specific item styles
+        <StyledMuiAccordion ref={ref} className={className} sx={sx} {...props} />
+    )
+);
+AccordionItem.displayName = 'AccordionItem';
+
+// ----------------------------------------------------------------------
+// 3. Accordion Trigger
+// Generalization: Allow custom icons and dynamic typography
+// ----------------------------------------------------------------------
+export interface CustomAccordionTriggerProps extends AccordionSummaryProps {
+    /** Override the default Chevron icon */
+    icon?: React.ReactNode;
+    /** Hide the icon completely */
+    hideIcon?: boolean;
+}
+
+const StyledMuiAccordionSummary = styled(MuiAccordionSummary)(({ theme }) => ({
+    padding: theme.spacing(1.5, 0), // Use theme spacing instead of '10px 0'
+    minHeight: 'auto',
+    '& .MuiAccordionSummary-content': {
+        margin: 0,
+        fontWeight: theme.typography.fontWeightMedium,
+        fontSize: theme.typography.body2.fontSize, // Adapts to your global theme
+    },
+    '& .MuiAccordionSummary-expandIconWrapper': {
+        color: theme.palette.text.secondary,
+    },
+    '&:hover': {
+        textDecoration: 'underline',
+    },
+}));
+
+const AccordionTrigger = React.forwardRef<HTMLDivElement, CustomAccordionTriggerProps>(
+    ({ className, children, icon, hideIcon = false, sx, ...props }, ref) => {
+        // Determine which icon to show
+        const expandIcon = hideIcon ? null : icon || <ChevronDown size={16} />;
+
+        return (
+            <StyledMuiAccordionSummary
+                ref={ref}
+                className={className}
+                expandIcon={expandIcon}
+                sx={sx}
+                {...props}
+            >
+                {children}
+            </StyledMuiAccordionSummary>
+        );
+    }
+);
+AccordionTrigger.displayName = 'AccordionTrigger';
+
+// ----------------------------------------------------------------------
+// 4. Accordion Content
+// Generalization: Theme-aware padding
+// ----------------------------------------------------------------------
+const StyledMuiAccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
+    padding: theme.spacing(0, 0, 1.5, 0),
+    fontSize: theme.typography.body2.fontSize,
+}));
+
+const AccordionContent = React.forwardRef<HTMLDivElement, AccordionDetailsProps>(
+    ({ className, sx, children, ...props }, ref) => (
+        <StyledMuiAccordionDetails ref={ref} className={className} sx={sx} {...props}>
+            {children}
+        </StyledMuiAccordionDetails>
+    )
+);
+AccordionContent.displayName = 'AccordionContent';
+
+export { Accordion, AccordionItem, AccordionTrigger, AccordionContent };
+
+================
+File: src/theme/theme-provider.tsx
+================
+"use client";
+
+import { CssBaseline, ThemeProvider } from "@mui/material";
+import { theme } from "./theme";
+
+type ThemeProviderProps = {
+    children: React.ReactNode;
+};
+
+export default function MuiThemeProvider({ children }: ThemeProviderProps) {
+    return (
+        <ThemeProvider theme={theme}>
+            <CssBaseline />
+            {children}
+        </ThemeProvider>
+    );
+}
+
+================
+File: src/theme/theme.ts
+================
+import { createTheme } from '@mui/material/styles';
+
+// ----------------------------------------------------------------------
+// 1. DESIGN TOKENS (Your Brand DNA)
+// ----------------------------------------------------------------------
+const palette = {
+    primary: { main: '#0f172a', contrastText: '#ffffff' }, // Slate 900
+    secondary: { main: '#64748b', contrastText: '#ffffff' }, // Slate 500
+    error: { main: '#ef4444', contrastText: '#ffffff' }, // Red 500
+    background: { default: '#ffffff', paper: '#ffffff' },
+    text: { primary: '#0f172a', secondary: '#64748b' },
+    divider: '#e2e8f0', // Slate 200
+};
+
+const typography = {
+    fontFamily: 'var(--font-inter), sans-serif',
+    button: {
+        textTransform: 'none' as const, // Kills Material uppercase
+        fontWeight: 500,
+    },
+};
+
+const shape = {
+    borderRadius: 6, // Global border radius
+};
+
+// ----------------------------------------------------------------------
+// 2. THEME CREATION & OVERRIDES
+// ----------------------------------------------------------------------
+export const theme = createTheme({
+    palette,
+    typography,
+    shape,
+    components: {
+        // --- GLOBAL BEHAVIORS ---
+        MuiButtonBase: {
+            defaultProps: {
+                disableRipple: true, // Kills the ripple effect globally
+            },
+        },
+
+        // --- SURFACES (Cards, Dialogs, Menus) ---
+        MuiPaper: {
+            defaultProps: {
+                elevation: 0, // Kills all drop shadows
+            },
+            styleOverrides: {
+                root: {
+                    backgroundImage: 'none',
+                    border: `1px solid ${palette.divider}`, // Replaces shadow with a flat border
+                },
+            },
+        },
+
+        // --- BUTTONS ---
+        MuiButton: {
+            defaultProps: {
+                disableElevation: true,
+            },
+            styleOverrides: {
+                root: {
+                    padding: '8px 16px',
+                    transition: 'background-color 0.2s, color 0.2s',
+                },
+            },
+            // Inject Custom Design System Variants
+            variants: [
+                {
+                    props: { variant: 'destructive' },
+                    style: {
+                        backgroundColor: palette.error.main,
+                        color: palette.error.contrastText,
+                        '&:hover': {
+                            backgroundColor: '#dc2626', // Red 600
+                        },
+                    },
+                },
+                {
+                    props: { variant: 'outline' },
+                    style: {
+                        backgroundColor: 'transparent',
+                        border: `1px solid ${palette.divider}`,
+                        color: palette.text.primary,
+                        '&:hover': {
+                            backgroundColor: '#f8fafc', // Slate 50
+                        },
+                    },
+                },
+                {
+                    props: { variant: 'ghost' },
+                    style: {
+                        backgroundColor: 'transparent',
+                        color: palette.text.primary,
+                        '&:hover': {
+                            backgroundColor: '#f8fafc',
+                        },
+                    },
+                },
+            ],
+        },
+
+        // --- INPUTS & FORMS ---
+        MuiOutlinedInput: {
+            styleOverrides: {
+                root: {
+                    borderRadius: shape.borderRadius,
+                    '& .MuiOutlinedInput-notchedOutline': {
+                        borderColor: palette.divider,
+                        transition: 'border-color 0.2s',
+                    },
+                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                        borderColor: palette.secondary.main,
+                    },
+                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                        borderWidth: '1px', // Prevents the border from getting thick on focus
+                        borderColor: palette.primary.main,
+                    },
+                },
+                input: {
+                    padding: '10px 14px',
+                    fontSize: '0.875rem',
+                },
+            },
+        },
+        MuiInputLabel: {
+            styleOverrides: {
+                root: {
+                    fontSize: '0.875rem',
+                    color: palette.text.secondary,
+                    '&.Mui-focused': {
+                        color: palette.primary.main,
+                    },
+                },
+            },
+        },
+
+        // --- LISTS & MENUS (Dropdowns) ---
+        MuiMenuItem: {
+            styleOverrides: {
+                root: {
+                    fontSize: '0.875rem',
+                    padding: '6px 12px',
+                    borderRadius: '4px',
+                    margin: '0 4px',
+                    '&.Mui-selected': {
+                        backgroundColor: '#f1f5f9', // Slate 100
+                        '&:hover': {
+                            backgroundColor: '#e2e8f0',
+                        },
+                    },
+                    '&:hover': {
+                        backgroundColor: '#f8fafc',
+                    },
+                },
+            },
+        },
+    },
+});
+
+================
+File: idea.md
+================
+# Next.js MUI Design System Architecture
+
+## Overview
+
+This project implements a "Shadcn-like" custom design system for a Next.js App Router application strictly using **Material UI (MUI) Core** (`@mui/material`).
+
+It intentionally avoids Tailwind CSS and `@mui/base`, relying instead on a hybrid approach of **Global Theme Overrides** and **API-Restricting Wrapper Components**. The goal is to strip away the default "Google Material" aesthetic to achieve a flat, modern, highly-customized UI while maintaining MUI's robust accessibility and complex component logic.
+
+---
+
+## The 3-Pillar Architecture
+
+### Pillar 1: Global Theme Overrides (The Brain)
+
+Instead of styling individual components with the `sx` prop or custom CSS, the visual identity is dictated by MUI's `createTheme` engine.
+
+- **Location:** `src/theme/index.ts`
+- **Purpose:** \* Define exact brand tokens (colors, typography, spacing, border radii).
+  - Globally strip Material defaults (e.g., `disableRipple: true` on `MuiButtonBase`, `elevation: 0` on `MuiPaper`).
+  - Inject custom design system variants directly into the theme (e.g., adding a `destructive` variant to `MuiButton`).
+- **Next.js Integration:** Injected via `AppRouterCacheProvider` in `src/app/layout.tsx` for server-side Emotion CSS extraction (preventing FOUC).
+
+### Pillar 2: API Restricting Wrappers (The Guardrails)
+
+Developers do not import directly from `@mui/material`. Instead, they import strictly from the local `src/components/ui/` directory.
+
+- **Location:** `src/components/ui/*` (e.g., `button.tsx`, `input.tsx`, `card.tsx`)
+- **Purpose:**
+  - **Restrict API:** Omit standard MUI props (like `color="secondary"`) and force developers to use only approved design system variants (e.g., `variant="destructive"`).
+  - **Simplify Imports:** Act as a single source of truth for UI elements.
+  - **Keep Code Clean:** These files remain remarkably thin because the actual CSS logic is handled by Pillar 1 (The Theme). They exist primarily for TypeScript interfaces and prop-mapping.
+
+### Pillar 3: Utility Integration (`clsx`)
+
+To allow seamless integration of standard CSS classes alongside MUI's generated classes, a utility function is utilized within the wrapper components.
+
+- **Location:** `src/lib/utils.ts`
+- **Implementation:** `export function cn(...inputs: ClassValue[]) { return clsx(inputs); }`
+- **Purpose:** Allows developers to pass a standard `className` (e.g., `className="custom-animation"`) to a `components/ui` wrapper without overwriting the underlying MUI styles.
+
+---
+
+## Directory Structure
+
+```text
+src/
+├── app/
+│   ├── layout.tsx         # Setup AppRouterCacheProvider & ThemeProvider
+│   └── page.tsx           # Uses components ONLY from @/components/ui
+├── components/
+│   ├── ui/                # The Restricted Design System Wrappers
+│   │   ├── button.tsx     # (e.g., enforces custom 'destructive' variant)
+│   │   ├── card.tsx       # (e.g., composes MuiPaper and Stack)
+│   │   └── input.tsx
+│   └── shared/            # Business logic / layout components
+├── lib/
+│   └── utils.ts           # clsx utility (cn function)
+├── theme/
+│   └── index.ts           # The Global createTheme configuration
+└── types/
+    └── mui.d.ts           # TypeScript module augmentations for custom variants
+```
+
+================
+File: public/file.svg
+================
+<svg fill="none" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M14.5 13.5V5.41a1 1 0 0 0-.3-.7L9.8.29A1 1 0 0 0 9.08 0H1.5v13.5A2.5 2.5 0 0 0 4 16h8a2.5 2.5 0 0 0 2.5-2.5m-1.5 0v-7H8v-5H3v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1M9.5 5V2.12L12.38 5zM5.13 5h-.62v1.25h2.12V5zm-.62 3h7.12v1.25H4.5zm.62 3h-.62v1.25h7.12V11z" clip-rule="evenodd" fill="#666" fill-rule="evenodd"/></svg>
+
+================
+File: public/globe.svg
+================
+<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><g clip-path="url(#a)"><path fill-rule="evenodd" clip-rule="evenodd" d="M10.27 14.1a6.5 6.5 0 0 0 3.67-3.45q-1.24.21-2.7.34-.31 1.83-.97 3.1M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m.48-1.52a7 7 0 0 1-.96 0H7.5a4 4 0 0 1-.84-1.32q-.38-.89-.63-2.08a40 40 0 0 0 3.92 0q-.25 1.2-.63 2.08a4 4 0 0 1-.84 1.31zm2.94-4.76q1.66-.15 2.95-.43a7 7 0 0 0 0-2.58q-1.3-.27-2.95-.43a18 18 0 0 1 0 3.44m-1.27-3.54a17 17 0 0 1 0 3.64 39 39 0 0 1-4.3 0 17 17 0 0 1 0-3.64 39 39 0 0 1 4.3 0m1.1-1.17q1.45.13 2.69.34a6.5 6.5 0 0 0-3.67-3.44q.65 1.26.98 3.1M8.48 1.5l.01.02q.41.37.84 1.31.38.89.63 2.08a40 40 0 0 0-3.92 0q.25-1.2.63-2.08a4 4 0 0 1 .85-1.32 7 7 0 0 1 .96 0m-2.75.4a6.5 6.5 0 0 0-3.67 3.44 29 29 0 0 1 2.7-.34q.31-1.83.97-3.1M4.58 6.28q-1.66.16-2.95.43a7 7 0 0 0 0 2.58q1.3.27 2.95.43a18 18 0 0 1 0-3.44m.17 4.71q-1.45-.12-2.69-.34a6.5 6.5 0 0 0 3.67 3.44q-.65-1.27-.98-3.1" fill="#666"/></g><defs><clipPath id="a"><path fill="#fff" d="M0 0h16v16H0z"/></clipPath></defs></svg>
+
+================
+File: public/next.svg
+================
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 394 80"><path fill="#000" d="M262 0h68.5v12.7h-27.2v66.6h-13.6V12.7H262V0ZM149 0v12.7H94v20.4h44.3v12.6H94v21h55v12.6H80.5V0h68.7zm34.3 0h-17.8l63.8 79.4h17.9l-32-39.7 32-39.6h-17.9l-23 28.6-23-28.6zm18.3 56.7-9-11-27.1 33.7h17.8l18.3-22.7z"/><path fill="#000" d="M81 79.3 17 0H0v79.3h13.6V17l50.2 62.3H81Zm252.6-.4c-1 0-1.8-.4-2.5-1s-1.1-1.6-1.1-2.6.3-1.8 1-2.5 1.6-1 2.6-1 1.8.3 2.5 1a3.4 3.4 0 0 1 .6 4.3 3.7 3.7 0 0 1-3 1.8zm23.2-33.5h6v23.3c0 2.1-.4 4-1.3 5.5a9.1 9.1 0 0 1-3.8 3.5c-1.6.8-3.5 1.3-5.7 1.3-2 0-3.7-.4-5.3-1s-2.8-1.8-3.7-3.2c-.9-1.3-1.4-3-1.4-5h6c.1.8.3 1.6.7 2.2s1 1.2 1.6 1.5c.7.4 1.5.5 2.4.5 1 0 1.8-.2 2.4-.6a4 4 0 0 0 1.6-1.8c.3-.8.5-1.8.5-3V45.5zm30.9 9.1a4.4 4.4 0 0 0-2-3.3 7.5 7.5 0 0 0-4.3-1.1c-1.3 0-2.4.2-3.3.5-.9.4-1.6 1-2 1.6a3.5 3.5 0 0 0-.3 4c.3.5.7.9 1.3 1.2l1.8 1 2 .5 3.2.8c1.3.3 2.5.7 3.7 1.2a13 13 0 0 1 3.2 1.8 8.1 8.1 0 0 1 3 6.5c0 2-.5 3.7-1.5 5.1a10 10 0 0 1-4.4 3.5c-1.8.8-4.1 1.2-6.8 1.2-2.6 0-4.9-.4-6.8-1.2-2-.8-3.4-2-4.5-3.5a10 10 0 0 1-1.7-5.6h6a5 5 0 0 0 3.5 4.6c1 .4 2.2.6 3.4.6 1.3 0 2.5-.2 3.5-.6 1-.4 1.8-1 2.4-1.7a4 4 0 0 0 .8-2.4c0-.9-.2-1.6-.7-2.2a11 11 0 0 0-2.1-1.4l-3.2-1-3.8-1c-2.8-.7-5-1.7-6.6-3.2a7.2 7.2 0 0 1-2.4-5.7 8 8 0 0 1 1.7-5 10 10 0 0 1 4.3-3.5c2-.8 4-1.2 6.4-1.2 2.3 0 4.4.4 6.2 1.2 1.8.8 3.2 2 4.3 3.4 1 1.4 1.5 3 1.5 5h-5.8z"/></svg>
+
+================
+File: public/vercel.svg
+================
+<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1155 1000"><path d="m577.3 0 577.4 1000H0z" fill="#fff"/></svg>
+
+================
+File: public/window.svg
+================
+<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill-rule="evenodd" clip-rule="evenodd" d="M1.5 2.5h13v10a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1zM0 1h16v11.5a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 0 12.5zm3.75 4.5a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5M7 4.75a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0m1.75.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5" fill="#666"/></svg>
+
+================
+File: src/app/globals.css
+================
+/* We don't need Tailwind directives here anymore! */
+
+:root {
+  /* You can define CSS variables here if you need to share them outside of React/MUI */
+}
+
+/* Example: A custom utility class that we can merge via clsx in our wrappers */
+.shake-on-error {
+  animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes shake {
+  10%,
+  90% {
+    transform: translate3d(-1px, 0, 0);
+  }
+  20%,
+  80% {
+    transform: translate3d(2px, 0, 0);
+  }
+  30%,
+  50%,
+  70% {
+    transform: translate3d(-4px, 0, 0);
+  }
+  40%,
+  60% {
+    transform: translate3d(4px, 0, 0);
+  }
+}
+
+/* Ensure images don't overflow */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+================
+File: src/app/layout.tsx
+================
+import * as React from 'react';
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google'; // Or whatever font you prefer
+import { AppRouterCacheProvider } from '@mui/material-nextjs/v14-appRouter';
+import MuiThemeProvider from '@/theme/theme-provider';
+
+// Import your minimal global CSS (mostly just CSS reset if needed)
+import './globals.css';
+
+// 1. Configure your font
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inter', // We use this variable in your theme/index.ts
+});
+
+export const metadata: Metadata = {
+  title: 'My Custom Design System',
+  description: 'Built with Next.js App Router and Material UI Core',
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en" className={inter.variable}>
+      {/* Suppress hydration warnings on the body tag. 
+        MUI injects styles that sometimes cause slight hydration mismatches during dev.
+      */}
+      <body suppressHydrationWarning>
+        {/* 2. The Cache Provider: 
+          This collects all the Emotion CSS generated by MUI on the server
+          and injects it into the HTML before sending it to the client.
+        */}
+        <AppRouterCacheProvider options={{ enableCssLayer: true }}>
+          {/* 3. The Theme Provider: Applies your global design tokens */}
+          <MuiThemeProvider>{children}</MuiThemeProvider>
+        </AppRouterCacheProvider>
+      </body>
+    </html>
+  );
+}
+
+================
+File: src/app/page.module.css
+================
+.page {
+  --background: #fafafa;
+  --foreground: #fff;
+
+  --text-primary: #000;
+  --text-secondary: #666;
+
+  --button-primary-hover: #383838;
+  --button-secondary-hover: #f2f2f2;
+  --button-secondary-border: #ebebeb;
+
+  display: flex;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-geist-sans);
+  background-color: var(--background);
+}
+
+.main {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  max-width: 800px;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  background-color: var(--foreground);
+  padding: 120px 60px;
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  gap: 24px;
+}
+
+.intro h1 {
+  max-width: 320px;
+  font-size: 40px;
+  font-weight: 600;
+  line-height: 48px;
+  letter-spacing: -2.4px;
+  text-wrap: balance;
+  color: var(--text-primary);
+}
+
+.intro p {
+  max-width: 440px;
+  font-size: 18px;
+  line-height: 32px;
+  text-wrap: balance;
+  color: var(--text-secondary);
+}
+
+.intro a {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.ctas {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  max-width: 440px;
+  gap: 16px;
+  font-size: 14px;
+}
+
+.ctas a {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 128px;
+  border: 1px solid transparent;
+  transition: 0.2s;
+  cursor: pointer;
+  width: fit-content;
+  font-weight: 500;
+}
+
+a.primary {
+  background: var(--text-primary);
+  color: var(--background);
+  gap: 8px;
+}
+
+a.secondary {
+  border-color: var(--button-secondary-border);
+}
+
+/* Enable hover only on non-touch devices */
+@media (hover: hover) and (pointer: fine) {
+  a.primary:hover {
+    background: var(--button-primary-hover);
+    border-color: transparent;
+  }
+
+  a.secondary:hover {
+    background: var(--button-secondary-hover);
+    border-color: transparent;
+  }
+}
+
+@media (max-width: 600px) {
+  .main {
+    padding: 48px 24px;
+  }
+
+  .intro {
+    gap: 16px;
+  }
+
+  .intro h1 {
+    font-size: 32px;
+    line-height: 40px;
+    letter-spacing: -1.92px;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .logo {
+    filter: invert();
+  }
+
+  .page {
+    --background: #000;
+    --foreground: #000;
+
+    --text-primary: #ededed;
+    --text-secondary: #999;
+
+    --button-primary-hover: #ccc;
+    --button-secondary-hover: #1a1a1a;
+    --button-secondary-border: #1a1a1a;
+  }
+}
+
+================
+File: src/app/page.tsx
+================
+import { Box, Button, Container, Stack, Typography } from "@mui/material";
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "../components/ui/accordion";
+
+export default function Home() {
+  return (
+    <Container maxWidth="md" sx={{ py: { xs: 8, md: 12 } }}>
+
+      <Box
+        sx={{
+          p: { xs: 3, md: 6 },
+          borderRadius: 4,
+          bgcolor: "background.paper",
+          border: "1px solid",
+          borderColor: "divider",
+          boxShadow: "0 10px 35px rgba(0, 0, 0, 0.08)",
+        }}
+      >
+        <Stack spacing={3}>
+          <Typography variant="overline" color="text.secondary">
+            Material UI is configured
+          </Typography>
+          <Typography variant="h3" component="h1">
+            Rental Design System
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            You can now build components using Material UI with theme support in
+            the Next.js App Router.
+          </Typography>
+          <Stack direction="row" spacing={2}>
+            <Button variant="contained">Primary Action</Button>
+            <Button variant="outlined">Secondary Action</Button>
+          </Stack>
+        </Stack>
+      </Box>
+      <Accordion>
+        <AccordionItem value="item-1">
+          <AccordionTrigger>Is it accessible?</AccordionTrigger>
+          <AccordionContent>
+            Yes. It adheres to the WAI-ARIA design pattern.
+          </AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="item-2">
+          <AccordionTrigger>Is it styled?</AccordionTrigger>
+          <AccordionContent>
+            Yes. It comes with default styles that matches the other components' aesthetic.
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+
+
+    </Container >
+  );
+}
+
+================
+File: .gitignore
+================
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+================
+File: eslint.config.mjs
+================
+import { defineConfig, globalIgnores } from "eslint/config";
+import nextVitals from "eslint-config-next/core-web-vitals";
+import nextTs from "eslint-config-next/typescript";
+
+const eslintConfig = defineConfig([
+  ...nextVitals,
+  ...nextTs,
+  // Override default ignores of eslint-config-next.
+  globalIgnores([
+    // Default ignores of eslint-config-next:
+    ".next/**",
+    "out/**",
+    "build/**",
+    "next-env.d.ts",
+  ]),
+]);
+
+export default eslintConfig;
+
+================
+File: next.config.ts
+================
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  /* config options here */
+};
+
+export default nextConfig;
+
+================
+File: package.json
+================
+{
+  "name": "rental-design-system",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@emotion/cache": "^11.14.0",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@mui/material": "^7.3.9",
+    "@mui/material-nextjs": "^7.3.9",
+    "lucide-react": "^0.577.0",
+    "next": "16.1.6",
+    "react": "19.2.3",
+    "react-dom": "19.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.1.6",
+    "typescript": "^5"
+  }
+}
+
+================
+File: README.md
+================
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+
+## Getting Started
+
+First, run the development server:
+
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+
+## Learn More
+
+To learn more about Next.js, take a look at the following resources:
+
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+================
+File: tsconfig.json
+================
+{
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts",
+    "**/*.mts"
+  ],
+  "exclude": ["node_modules"]
+}
+
+
+
+
+
+================================================================
+End of Codebase
+================================================================
