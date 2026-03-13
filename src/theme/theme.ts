@@ -1,5 +1,13 @@
 import { createTheme } from '@mui/material/styles';
 
+declare module '@mui/material/Button' {
+    interface ButtonPropsVariantOverrides {
+        destructive: true;
+        outline: true;
+        ghost: true;
+    }
+}
+
 // ----------------------------------------------------------------------
 // 1. DESIGN TOKENS (Your Brand DNA)
 // ----------------------------------------------------------------------
@@ -154,5 +162,44 @@ export const theme = createTheme({
                 },
             },
         },
+        MuiInputBase: {
+            styleOverrides: {
+                root: {
+                    border: `1px solid ${palette.divider}`,
+                    borderRadius: shape.borderRadius,
+                    padding: '8px 12px',
+                    fontSize: '0.875rem',
+                    backgroundColor: 'transparent',
+                    transition: 'border-color 0.2s, box-shadow 0.2s',
+
+                    // Hover state
+                    '&:hover': {
+                        borderColor: palette.secondary.main,
+                    },
+
+                    // Focus state (The Shadcn inner ring)
+                    '&.Mui-focused': {
+                        borderColor: palette.primary.main,
+                        boxShadow: `0 0 0 1px ${palette.primary.main}`,
+                    },
+
+                    // Disabled state
+                    '&.Mui-disabled': {
+                        opacity: 0.5,
+                        cursor: 'not-allowed',
+                        backgroundColor: '#f8fafc', // Light slate
+                    },
+                },
+                input: {
+                    padding: 0, // Reset internal padding so the root handles it
+                    height: 'auto',
+                    '&::placeholder': {
+                        color: palette.text.secondary,
+                        opacity: 1, // Override MUI's default placeholder opacity
+                    },
+                },
+            },
+        },
     },
 });
+
